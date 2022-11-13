@@ -31,6 +31,7 @@ func entry(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("=============", r.URL.Path)
 
 	if action, ok := GActionRouter[r.URL.Path]; ok {
+		r.ParseForm()
 		if action != nil {
 			action.Execute(w, r)
 		} else {
