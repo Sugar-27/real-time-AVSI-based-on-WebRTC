@@ -3,6 +3,7 @@ package action
 import (
 	"fmt"
 	"net/http"
+	"signaling/src/framework"
 	"text/template"
 )
 
@@ -18,7 +19,8 @@ func writeHtmlErrorResponse(w http.ResponseWriter, status int, err string) {
 }
 
 
-func (*xrtcClientPushAction) Execute(w http.ResponseWriter, r *http.Request) {
+func (*xrtcClientPushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
+	r := cr.R
 	// fmt.Println("hello xrtcclient push action")
 	t, err := template.ParseFiles("./static/template/push.tpl")
 	if err != nil {

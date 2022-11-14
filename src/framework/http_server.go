@@ -3,6 +3,7 @@ package framework
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func init() {
@@ -11,15 +12,33 @@ func init() {
 
 // 定义通用的Action接口
 type ActionInterface interface {
-	Execute(w http.ResponseWriter, r *http.Request)
+	Execute(w http.ResponseWriter, cr *ComRequest)
 }
 
 // 定义全局的路由表
 var GActionRouter map[string]ActionInterface = make(map[string]ActionInterface)
 
+type  ComRequest struct {
+	R      *http.Request
+	Logger *ComLog
+	LogId  uint32
+}
+
 func responseError(w http.ResponseWriter, r *http.Request, status int, err string) {
 	w.WriteHeader(status)
 	w.Write([]byte(fmt.Sprintf("%d - %s", status, err)))
+}
+
+func getRealClientIP(r *http.Request) string {
+	ip := r.RemoteAddr
+
+	if rip := r.Header.Get("X-Real-IP"); rip != "" {
+		ip = rip
+	} else if rip = r.Header.Get("X-Forwarded-IP"); rip != "" {
+		ip = rip
+	}
+
+	return ip
 }
 
 func entry(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +50,22 @@ func entry(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("=============", r.URL.Path)
 
 	if action, ok := GActionRouter[r.URL.Path]; ok {
-		r.ParseForm()
 		if action != nil {
-			action.Execute(w, r)
+			cr := &ComRequest{
+				R: r,
+				Logger: &ComLog{},
+				LogId: GetLogId32(),
+			}
+			cr.Logger.AddNotice("logID", strconv.Itoa(int(cr.LogId)))
+			cr.Logger.AddNotice("url", r.URL.Path)
+			cr.Logger.AddNotice("referer", r.Header.Get("Referer"))
+			cr.Logger.AddNotice("cookie", r.Header.Get("Cookie"))
+			cr.Logger.AddNotice("ua", r.Header.Get("User-Agent"))
+			cr.Logger.AddNotice("clientIP", r.RemoteAddr)
+			cr.Logger.AddNotice("realClientIP", getRealClientIP(r))
+			r.ParseForm()
+			action.Execute(w, cr)
+			cr.Logger.Infof("")
 		} else {
 			responseError(w, r, http.StatusInternalServerError, "Internal server error")
 		}
