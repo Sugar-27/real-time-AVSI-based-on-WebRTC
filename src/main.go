@@ -1,12 +1,24 @@
 package main
 
 import (
+	"flag"
 	"signaling/src/framework"
+	"signaling/src/glog"
 )
 
 func main() {
-	err := framework.StartHttp()
-	if (err != nil) {
+	flag.Parse()
+
+	err := framework.Init()
+	if err != nil {
+		panic(err)
+	}
+
+	glog.Info("hello, world!")
+	glog.Debug("Test Debug")
+
+	err = framework.StartHttp()
+	if err != nil {
 		panic(err)
 	}
 }

@@ -40,6 +40,14 @@ var logDirs []string
 // See createLogDirs for the full list of possible destinations.
 var logDir = flag.String("log_dir", "", "If non-empty, write log files in this directory")
 
+func SetLogDir(name string) {
+	*logDir = name
+}
+
+func SetLogFileName(name string) {
+	logFileName = name
+}
+
 func createLogDirs() {
 	if *logDir != "" {
 		logDirs = append(logDirs, *logDir)
@@ -48,10 +56,11 @@ func createLogDirs() {
 }
 
 var (
-	pid      = os.Getpid()
-	program  = filepath.Base(os.Args[0])
-	host     = "unknownhost"
-	userName = "unknownuser"
+	pid         = os.Getpid()
+	program     = filepath.Base(os.Args[0])
+	logFileName = program
+	host        = "unknownhost"
+	userName    = "unknownuser"
 )
 
 func init() {
@@ -81,10 +90,8 @@ func shortHostname(hostname string) string {
 // logName returns a new log file name containing tag, with start time t, and
 // the name for the symlink for tag.
 func logName(tag string, t time.Time) (name, link string) {
-	name = fmt.Sprintf("%s.%s.%s.log.%s.%04d%02d%02d-%02d%02d%02d.%d",
-		program,
-		host,
-		userName,
+	name = fmt.Sprintf("%s.log.%s.%04d%02d%02d-%02d%02d%02d.%d",
+		logFileName,
 		tag,
 		t.Year(),
 		t.Month(),
