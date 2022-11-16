@@ -18,11 +18,11 @@ func writeHtmlErrorResponse(w http.ResponseWriter, status int, err string) {
 	w.Write([]byte(err))
 }
 
-
 func (*xrtcClientPushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 	r := cr.R
 	// fmt.Println("hello xrtcclient push action")
-	t, err := template.ParseFiles("./static/template/push.tpl")
+	t, err := template.ParseFiles(framework.GetStaticDir() + "/template/push.tpl")
+	fmt.Printf("Test: %s\n", framework.GetStaticDir())
 	if err != nil {
 		fmt.Println(err)
 		writeHtmlErrorResponse(w, http.StatusNotFound, "404 - Not found")
@@ -41,4 +41,3 @@ func (*xrtcClientPushAction) Execute(w http.ResponseWriter, cr *framework.ComReq
 		return
 	}
 }
-

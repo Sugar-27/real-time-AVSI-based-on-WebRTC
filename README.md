@@ -7,8 +7,16 @@ go version go1.19.3 linux/amd64
 
 ## 文件目录
 ### src文件
-源代码：包括本项目的framework模块、action模块、log模块（基于开源项目[glog](https://github.com/golang/glog)修改而来）
+源代码部分：
+1. main.go - 主程序
+2. router.go - action的路由实现
+3. framework模
+4. action模块
+5. log模块（基于开源项目[glog](https://github.com/golang/glog)修改而来）
+6. 系统配置模块(基于开源项目[goconfig](https://github.com/unknwon/goconfig))
 ### static
 静态网站文件，包括html以及相对应的js代码
+### conf
+服务器配置文件夹，服务器启动时加载配置
 ### build.sh
 编译生成服务器二进制执行文件
