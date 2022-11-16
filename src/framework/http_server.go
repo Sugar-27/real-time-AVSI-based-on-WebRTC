@@ -64,7 +64,15 @@ func entry(w http.ResponseWriter, r *http.Request) {
 			cr.Logger.AddNotice("clientIP", r.RemoteAddr)
 			cr.Logger.AddNotice("realClientIP", getRealClientIP(r))
 			r.ParseForm()
+
+			// 添加请求的参数到log中
+			for k, v := range r.Form {
+				cr.Logger.AddNotice(k, v[0])
+			}
+			
+			cr.Logger.TimeBegin("totalCost")
 			action.Execute(w, cr)
+			cr.Logger.TimeEnd("totalCost")
 			cr.Logger.Infof("")
 		} else {
 			responseError(w, r, http.StatusInternalServerError, "Internal server error")
