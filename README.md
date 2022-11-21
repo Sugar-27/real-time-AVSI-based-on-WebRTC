@@ -17,6 +17,6 @@ go version go1.19.3 linux/amd64
 ### static
 静态网站文件，包括html以及相对应的js代码
 ### conf
-服务器配置文件夹，服务器启动时加载配置
+服务器配置文件夹，服务器启动时加载配置，同时还包括https的证书文件`fullchain.pem`和`privkey.pem`，使用时请将自己的https证书放进去
 ### build.sh
 编译生成服务器二进制执行文件

@@ -19,7 +19,7 @@ type ActionInterface interface {
 // 定义全局的路由表
 var GActionRouter map[string]ActionInterface = make(map[string]ActionInterface)
 
-type  ComRequest struct {
+type ComRequest struct {
 	R      *http.Request
 	Logger *ComLog
 	LogId  uint32
@@ -53,9 +53,9 @@ func entry(w http.ResponseWriter, r *http.Request) {
 	if action, ok := GActionRouter[r.URL.Path]; ok {
 		if action != nil {
 			cr := &ComRequest{
-				R: r,
+				R:      r,
 				Logger: &ComLog{},
-				LogId: GetLogId32(),
+				LogId:  GetLogId32(),
 			}
 			cr.Logger.AddNotice("logID", strconv.Itoa(int(cr.LogId)))
 			cr.Logger.AddNotice("url", r.URL.Path)
@@ -83,8 +83,19 @@ func entry(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func RegisterStaticUrl() {
+	fs := http.FileServer(http.Dir(gconf.httpStaticDir))
+	http.Handle(gconf.httpStaticPrefix, http.StripPrefix(gconf.httpStaticPrefix, fs))
+}
+
 func StartHttp() error {
 	// fmt.Println("start http")
 	glog.Infof("start http server on port: %d", gconf.httpPort)
 	return http.ListenAndServe(fmt.Sprintf(":%d", gconf.httpPort), nil)
+}
+
+func StartHttps() error {
+	// fmt.Println("start http")
+	glog.Infof("start https server on port: %d", gconf.httpsPort)
+	return http.ListenAndServeTLS(fmt.Sprintf(":%d", gconf.httpsPort), gconf.httpsCert, gconf.httpsKey, nil)
 }
