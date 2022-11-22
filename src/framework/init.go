@@ -23,5 +23,10 @@ func Init(confFile string) error {
 	glog.SetLogLevel(gconf.logLevel)
 	// glog.SetLogToStderr(true)
 	glog.SetLogAlsoToStedrr(gconf.logAlsoToStdErr)
+
+	err = loadXrpc()
+	if err != nil {
+		return err
+	}
 	return nil
 }

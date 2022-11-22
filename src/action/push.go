@@ -8,12 +8,33 @@ import (
 	"strconv"
 )
 
-type pushAction struct {
+const (
+	CMDNO_PUSH      = 1
+	CMDNO_PULL      = 2
+	CMDNO_ANSWER    = 3
+	CMDNO_STOP_PUSH = 4
+	CMDNO_STOP_PULL = 5
+)
 
+type pushAction struct {
 }
 
 func NewPushAction() *pushAction {
 	return &pushAction{}
+}
+
+type xrtcPushReq struct {
+	Cmdno      int    `json:"cmdno"`
+	Uid        uint64 `json:"uid"`
+	StreamName string `json:"stream_name"`
+	Audio      int    `json:"audio"`
+	Video      int    `json:"video"`
+}
+
+type xrtcPushResp struct {
+	Errno  int    `json:"err_no"`
+	ErrMsg string `json:"err_msg"`
+	Offer  string `json:"offer"`
 }
 
 func (*pushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
@@ -27,7 +48,7 @@ func (*pushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 
 	uid, err := strconv.ParseUint(strUid, 10, 64)
 	if err != nil || uid <= 0 {
-		cerr := comerrors.New(comerrors.ParamErr, "parse uid error:" + err.Error())
+		cerr := comerrors.New(comerrors.ParamErr, "parse uid error:"+err.Error())
 		writeJsonErrorResponse(cerr, w, cr)
 		return
 	}
@@ -66,6 +87,23 @@ func (*pushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 		video = 0
 	} else {
 		video = 1
+	}
+
+	req := xrtcPushReq{
+		Cmdno:      CMDNO_PUSH,
+		Uid:        uid,
+		StreamName: streamName,
+		Audio:      audio,
+		Video:      video,
+	}
+
+	var resp xrtcPushResp
+
+	err = framework.Call("xrtc", req, resp, cr.LogId)
+	if err != nil {
+		cerr := comerrors.New(comerrors.NetworkErr, "backend process error")
+		writeJsonErrorResponse(cerr, w, cr)
+		return
 	}
 
 	fmt.Println(uid, streamName, audio, video)
