@@ -1,6 +1,8 @@
 package framework
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"signaling/src/framework/xrpc"
@@ -59,5 +61,25 @@ func loadXrpc() error {
 
 func Call(serviceName string, request interface{}, response interface{}, logId uint32) error {
 	fmt.Println("call " + serviceName)
+
+	client, ok := xrpcClients["xrpc."+serviceName]
+	if !ok {
+		return fmt.Errorf("[%s] service not found", serviceName)
+	}
+
+	content, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+
+	req := xrpc.NewRequest(bytes.NewReader(content), logId)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(resp)
+
 	return nil
 }
