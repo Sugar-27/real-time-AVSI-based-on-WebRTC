@@ -1,3 +1,8 @@
+/*
+ * @Author: Sugar 45682h@gmail.com
+ * @Date: 2022-11-23 11:17:34
+ * @Describe: 
+ */
 package xrpc
 
 import (
@@ -12,7 +17,7 @@ type Request struct {
 
 func NewRequest(body io.Reader, logId uint32) *Request {
 	req := new(Request)
-	req.Header.LogId = uint16(logId)
+	req.Header.LogId = logId
 	req.Header.MagicNum = HEADER_MAGICNUM
 
 	if body != nil {
@@ -27,4 +32,13 @@ func NewRequest(body io.Reader, logId uint32) *Request {
 	}
 
 	return req
+}
+
+func (r *Request) Write(w io.Writer) (n int, err error) {
+	if n, err = r.Header.Write(w); err != nil {
+		return 0, err
+	}
+
+	written, err := io.Copy(w, r.Body)
+	return int(written), err
 }

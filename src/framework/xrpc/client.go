@@ -1,14 +1,20 @@
+/*
+ * @Author: Sugar 45682h@gmail.com
+ * @Date: 2022-11-22 20:36:18
+ * @Describe:
+ */
 package xrpc
 
 import (
+	"bufio"
 	"net"
 	"time"
 )
 
 const (
 	defaultConnectTimeout = 100 * time.Millisecond
-	defaultReadTimeout = 500 * time.Millisecond
-	defaultWriteTimeout = 500 * time.Millisecond
+	defaultReadTimeout    = 500 * time.Millisecond
+	defaultWriteTimeout   = 500 * time.Millisecond
 )
 
 type Client struct {
@@ -51,7 +57,7 @@ func (c *Client) writeTimeout() time.Duration {
 func (c *Client) Do(req *Request) (*Response, error) {
 	addr, err := c.selector.PickServer()
 	if err != nil {
-		return  nil, err
+		return nil, err
 	}
 
 	nc, err := net.DialTimeout(addr.Network(), addr.String(), c.connectTimeout())
@@ -60,6 +66,15 @@ func (c *Client) Do(req *Request) (*Response, error) {
 	}
 	nc.SetReadDeadline(time.Now().Add(c.ReadTimeout))
 	nc.SetWriteDeadline(time.Now().Add(c.WriteTimeout))
+
+	rw := bufio.NewReadWriter(bufio.NewReader(nc), bufio.NewWriter(nc))
+	if _, err = req.Write(rw); err != nil {
+		return nil, err
+	}
+
+	if err = rw.Flush(); err != nil {
+		return nil, err
+	}
 
 	return nil, nil
 }
