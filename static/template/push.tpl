@@ -40,7 +40,7 @@
         <h3>1v1屏幕共享-推流端</h3>
 
         <div class="highlight">
-            推流基本信息
+            推流端基本信息
             <span>
                 uid = {{.uid}}
                 streamName = {{.streamName}}
@@ -49,7 +49,9 @@
             </span>
         </div>
 
-        <div>
+        <span id="tips1"></span>
+
+        <div style="margin-top:5px">
             <video id="localVideo" controls autoplay></video>
         </div>
 

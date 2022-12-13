@@ -26,7 +26,7 @@ type Header struct {
 	BodyLen  uint32
 }
 
-func (h* Header) Marshal(b []byte) error {
+func (h *Header) Marshal(b []byte) error {
 	if len(b) < HEADER_SIZE {
 		return errors.New("no enough buffer for header")
 	}
@@ -42,6 +42,22 @@ func (h* Header) Marshal(b []byte) error {
 	return nil
 }
 
+func (h *Header) UnMarshal(b []byte) error {
+	if len(b) < HEADER_SIZE {
+		return errors.New("incomplete header")
+	}
+
+	h.Id = binary.LittleEndian.Uint16(b[0:2])
+	h.Version = binary.LittleEndian.Uint16(b[2:4])
+	h.LogId = binary.LittleEndian.Uint32(b[4:8])
+	copy(h.Provider[:], b[8:24])
+	h.MagicNum = binary.LittleEndian.Uint32(b[24:28])
+	h.Reserved = binary.LittleEndian.Uint32(b[28:32])
+	h.BodyLen = binary.LittleEndian.Uint32(b[32:36])
+
+	return nil
+}
+
 func (h *Header) Write(w io.Writer) (n int, err error) {
 	var buf [HEADER_SIZE]byte
 	if err := h.Marshal(buf[:]); err != nil {
@@ -49,4 +65,17 @@ func (h *Header) Write(w io.Writer) (n int, err error) {
 	}
 
 	return w.Write(buf[:])
+}
+
+func (h *Header) Read(r io.Reader) (n int, err error) {
+	var buf [HEADER_SIZE]byte
+	if n, err = io.ReadFull(r, buf[:]); err != nil {
+		return 0, err
+	}
+
+	if err = h.UnMarshal(buf[:]); err != nil {
+		return 0, err
+	}
+
+	return n, nil
 }

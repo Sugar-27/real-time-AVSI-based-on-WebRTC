@@ -1,3 +1,8 @@
+/*
+ * @Author: Sugar 45682h@gmail.com
+ * @Date: 2022-11-22 20:15:56
+ * @Describe:
+ */
 package framework
 
 import (
@@ -79,7 +84,10 @@ func Call(serviceName string, request interface{}, response interface{}, logId u
 		return err
 	}
 
-	fmt.Println(resp)
+	err = json.Unmarshal(resp.Body, response)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
