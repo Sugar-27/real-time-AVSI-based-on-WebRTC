@@ -24,6 +24,7 @@ function startPush() {
             if (textStatus == "success" && data.errNo == 0) {
                 console.log("success")
                 $("#tips1").html("<font color='blue'>推流请求成功!</font>");
+                console.log("remote offer: \r\n" + data.data.sdp);
             } else {
                 $("#tips1").html("<font color='red'>推流请求失败!</font>");
             }
